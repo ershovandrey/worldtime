@@ -1,0 +1,36 @@
+jquery.rotate:
+  remote:
+  version: VERSION
+  license:
+    name: MIT
+    gpl-compatible: false
+  js:
+    /libraries/jclocksgmt/js/jquery.rotate.js: {}
+  dependencies:
+    - core/jquery
+
+jclocksgmt:
+  remote: https://github.com/mcmastermind/jClocksGMT
+  version: VERSION
+  license:
+    name: MIT
+    gpl-compatible: false
+  js:
+    /libraries/jclocksgmt/js/jClocksGMT.js: {}
+  css:
+    theme:
+      /libraries/jclocksgmt/css/jClocksGMT.css: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - worldtime/jquery.rotate
+
+worldtime:
+  version: VERSION
+  js:
+    js/worldtime.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - worldtime/jclocksgmt

@@ -1,5 +1,7 @@
-name: 'World Clock Time'
+name: 'World Clock Time Widget'
 type: module
-description: 'Adds a block with World Clock Time widget'
-core: 8.x
+description: 'Adds a block with World Clock Time Widget'
 package: 'Custom'
+core: 8.x
+dependencies:
+  - drupal:block

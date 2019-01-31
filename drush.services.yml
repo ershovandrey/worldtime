@@ -1,0 +1,5 @@
+services:
+  worldtime.commands:
+    class: \Drupal\worldtime\Commands\WorldTimeCommands
+    tags:
+      - { name: drush.command }
