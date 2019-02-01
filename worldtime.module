@@ -7,6 +7,10 @@
 
 use Drupal\Core\Routing\RouteMatchInterface;
 
+define('WORLDTIME_MAX_LOCATIONS', 5);
+define('WORLDTIME_DEFAULT_TIMEFORMAT', 'HH:mm');
+define('WORLDTIME_DEFAULT_SKIN', 1);
+
 /**
  * Implements hook_help().
  */
@@ -35,4 +39,20 @@ function worldtime_theme() {
       'file' => 'worldtime.theme.inc',
     ),
   );
+}
+
+/**
+ * Get timezone offset.
+ *
+ * @param string $timezone
+ *
+ * @return int
+ *   Timezone offset in hours.
+ * @throws \Exception
+ */
+function worldtime_get_timezone_offset($timezone) {
+  $dtz = new \DateTimeZone($timezone);
+  $dt = new \DateTime('now', $dtz);
+  $offset = $dtz->getOffset($dt);
+  return $offset / 3600;
 }
