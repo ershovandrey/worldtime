@@ -22,3 +22,17 @@ function worldtime_help($route_name, RouteMatchInterface $route_match) {
     default:
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function worldtime_theme() {
+  return array(
+    'wtcwidget' => array(
+      'variables' => array(
+        'items' => NULL,
+      ),
+      'file' => 'worldtime.theme.inc',
+    ),
+  );
+}

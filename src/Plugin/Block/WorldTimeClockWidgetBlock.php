@@ -40,13 +40,10 @@ class WorldTimeClockWidgetBlock extends BlockBase {
         'imgpath' => base_path() . 'libraries/jclocksgmt/',
       ],
     ];
-    $output = '';
-    foreach (array_keys($settings) as $index) {
-      $output .= '<div class="wtc-widget" id="wtc-widget-' . $index . '"></div>';
-    }
 
     return [
-      '#markup' => $output,
+      '#theme' => 'wtcwidget',
+      '#items' => array_keys($settings),
       '#attached' => [
         'library' => 'worldtime/worldtime',
         'drupalSettings' => [
