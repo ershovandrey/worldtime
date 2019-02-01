@@ -8,9 +8,9 @@
         return;
       }
 
-      $('.wtc-widget', context).each(function (index) {
+      $('.wtc-widget', context).once('wtc-widget').each(function (index) {
         if (typeof settings.wtcwidget[index] !== 'undefined') {
-          $(this).once('init-wtc-widget').jClocksGMT(settings.wtcwidget[index]);
+          $(this).jClocksGMT(settings.wtcwidget[index]);
         }
       });
     }
