@@ -8,7 +8,11 @@
         return;
       }
 
-      $('.wtc-widget', context).once('init-wtc-widget').jClocksGMT(settings.wtcwidget);
+      $('.wtc-widget', context).each(function (index) {
+        if (typeof settings.wtcwidget[index] !== 'undefined') {
+          $(this).once('init-wtc-widget').jClocksGMT(settings.wtcwidget[index]);
+        }
+      });
     }
   };
 
