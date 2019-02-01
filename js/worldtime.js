@@ -4,7 +4,7 @@
 
   Drupal.behaviors.initWorldTimeClockWidget = {
     attach: function (context, settings) {
-      if (!$.isFunction($.jClocksGMT) || typeof settings.wtcwidget === 'undefined') {
+      if (!$.isFunction($.fn.jClocksGMT) || typeof settings.wtcwidget === 'undefined') {
         return;
       }
 

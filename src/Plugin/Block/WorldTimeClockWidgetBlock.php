@@ -19,13 +19,14 @@ class WorldTimeClockWidgetBlock extends BlockBase {
    */
   public function build() {
     $settings = [
-      'title' => 'Houston, TX, USA',
-      'offset' => -6,
-      'skin' => 2
+      'title' => 'Helsinki, Finland',
+      'offset' => +2,
+      'skin' => 1,
+      'imgpath' => base_path() . 'libraries/jclocksgmt/',
     ];
 
     return [
-      '#markup' => '<div class="wtc-widget" id="worldtimeclockwidget">Test</div>',
+      '#markup' => '<div class="wtc-widget" id="worldtimeclockwidget"></div>',
       '#attached' => [
         'library' => 'worldtime/worldtime',
         'drupalSettings' => [
