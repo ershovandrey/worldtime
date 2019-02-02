@@ -22,7 +22,6 @@ jclocksgmt:
       /libraries/jclocksgmt/css/jClocksGMT.css: {}
   dependencies:
     - core/jquery
-    - core/jquery.once
     - worldtime/jquery.rotate
 
 worldtime:
@@ -31,6 +30,7 @@ worldtime:
     js/worldtime.js: {}
   dependencies:
     - core/jquery
+    - core/jquery.once
     - core/drupal
     - core/drupalSettings
     - worldtime/jclocksgmt
