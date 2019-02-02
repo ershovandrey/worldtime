@@ -9,6 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 
 define('WORLDTIME_MAX_LOCATIONS', 5);
 define('WORLDTIME_DEFAULT_TIMEFORMAT', 'HH:mm');
+define('WORLDTIME_DEFAULT_DATEFORMAT', 'DD.MM.YYYY');
 define('WORLDTIME_DEFAULT_SKIN', 1);
 
 /**

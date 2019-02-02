@@ -32,6 +32,19 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form_state->set('locations', $locations);
     }
 
+    $now = \Drupal::time()->getRequestTime();
+    $time_options = [
+      'HH:mm' => \Drupal::service('date.formatter')->format($now, 'custom', 'H:i'),
+      'hh:mm A' => \Drupal::service('date.formatter')->format($now, 'custom', 'h:i A'),
+    ];
+
+    $date_options = [
+      'DD.MM.YYYY' => \Drupal::service('date.formatter')->format($now, 'custom', 'd.m.Y'),
+      'MM.DD.YYYY' => \Drupal::service('date.formatter')->format($now, 'custom', 'm.d.Y'),
+      'YYYY-MM-DD' => \Drupal::service('date.formatter')->format($now, 'custom', 'Y-m-d'),
+      'YYYY/MM/DD' => \Drupal::service('date.formatter')->format($now, 'custom', 'Y/m/d'),
+    ];
+
     $skins = [];
     foreach (range(1, 5) as $id) {
       $label = $this->t('Skin @id', ['@id' => $id]);
@@ -58,12 +71,21 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     for ($i = 0; $i <= $locations; $i++) {
       $title = '';
       $timezone = '';
+      $digital = TRUE;
       $timeformat = WORLDTIME_DEFAULT_TIMEFORMAT;
+      $date = FALSE;
+      $dateformat = WORLDTIME_DEFAULT_DATEFORMAT;
+      $analog = TRUE;
       $skin = WORLDTIME_DEFAULT_SKIN;
+
       if (isset($config['locations']) && isset($config['locations'][$i])) {
         $title = $config['locations'][$i]['title'];
         $timezone = $config['locations'][$i]['timezone'];
+        $digital = $config['locations'][$i]['digital'];
         $timeformat = $config['locations'][$i]['timeformat'];
+        $date = $config['locations'][$i]['date'];
+        $dateformat = $config['locations'][$i]['dateformat'];
+        $analog = $config['locations'][$i]['analog'];
         $skin = $config['locations'][$i]['skin'];
       }
       $form['locations'][$i] = [
@@ -89,16 +111,49 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#required' => TRUE,
       ];
 
+      $form['locations'][$i]['digital'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show Digital clock'),
+        '#default_value' => $digital,
+      ];
       $form['locations'][$i]['timeformat'] = [
         '#type' => 'select',
         '#title' => t('Time format'),
         '#default_value' => $timeformat,
-        '#options' => [
-          'HH:mm' => $this->t('24 Hour'),
-          'hh:mm A' => $this->t('12 Hour'),
+        '#options' => $time_options,
+        '#states' => [
+          'visible' => [
+            ':input[name="settings[locations][' . $i . '][digital]"]' => [
+              'checked' => TRUE,
+            ],
+          ],
         ],
       ];
 
+      $form['locations'][$i]['date'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show current date'),
+        '#default_value' => $date,
+      ];
+      $form['locations'][$i]['dateformat'] = [
+        '#type' => 'select',
+        '#title' => t('Time format'),
+        '#default_value' => $dateformat,
+        '#options' => $date_options,
+        '#states' => [
+          'visible' => [
+            ':input[name="settings[locations][' . $i . '][date]"]' => [
+              'checked' => TRUE,
+            ],
+          ],
+        ],
+      ];
+
+      $form['locations'][$i]['analog'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Show Analog clock'),
+        '#default_value' => $analog,
+      ];
       $form['locations'][$i]['skin'] = [
         '#type' => 'radios',
         '#title' => $this->t('Clock Skin'),
@@ -107,6 +162,13 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#attributes' => [
           'class' => [
             'container-inline',
+          ],
+        ],
+        '#states' => [
+          'visible' => [
+            ':input[name="settings[locations][' . $i . '][analog]"]' => [
+              'checked' => TRUE,
+            ],
           ],
         ],
       ];
@@ -179,6 +241,19 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form_state->set('locations', $form_state->get('locations') - 1);
     }
     $form_state->setRebuild();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockValidate($form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+    unset($values['locations']['actions']);
+    foreach ($values['locations'] as $i => $location) {
+      if (!$location['digital'] && !$location['analog']) {
+        $form_state->setErrorByName('locations][' . $i . '][title', $this->t('You must select either digital or analog clock.'));
+      }
+    }
   }
 
   /**
