@@ -8,9 +8,11 @@
         return;
       }
 
-      $('.wtc-widget', context).once('wtc-widget').each(function (index) {
-        if (typeof settings.wtcwidget[index] !== 'undefined') {
-          $(this).jClocksGMT(settings.wtcwidget[index]);
+      $('.wtc-widget', context).once('wtc-widget').each(function () {
+        var parent_id = $(this).closest('.block-worldtime').prop('id');
+        var widget_id = $(this).prop('id');
+        if (typeof settings.wtcwidget[parent_id][widget_id] !== 'undefined') {
+          $(this).jClocksGMT(settings.wtcwidget[parent_id][widget_id]);
         }
       });
     }

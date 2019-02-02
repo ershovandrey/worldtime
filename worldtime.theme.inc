@@ -20,7 +20,7 @@ function template_preprocess_wtcwidget(&$variables) {
   foreach ($variables['items'] as $index => &$item) {
     $attributes = [
       'class' => ['wtc-widget'],
-      'id' => 'wtc-widget-' . $index,
+      'id' => $index,
     ];
     $item = [
       'attributes' => new Attribute($attributes),

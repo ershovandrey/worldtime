@@ -71,6 +71,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     for ($i = 0; $i <= $locations; $i++) {
       $title = '';
       $timezone = '';
+      $dst = TRUE;
       $digital = TRUE;
       $timeformat = WORLDTIME_DEFAULT_TIMEFORMAT;
       $date = FALSE;
@@ -81,6 +82,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       if (isset($config['locations']) && isset($config['locations'][$i])) {
         $title = $config['locations'][$i]['title'];
         $timezone = $config['locations'][$i]['timezone'];
+        $dst = $config['locations'][$i]['dst'];
         $digital = $config['locations'][$i]['digital'];
         $timeformat = $config['locations'][$i]['timeformat'];
         $date = $config['locations'][$i]['date'];
@@ -109,6 +111,12 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#default_value' => $timezone,
         '#options' => system_time_zones(TRUE, TRUE),
         '#required' => TRUE,
+      ];
+
+      $form['locations'][$i]['dst'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Enable automatic Daylight Savings Time (DST) conversion'),
+        '#default_value' => $dst,
       ];
 
       $form['locations'][$i]['digital'] = [
@@ -266,22 +274,29 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     foreach ($values['locations'] as $i => $location) {
       $this->configuration['locations'][$i] = $location;
     }
+
+    // Store block id separately as workaround for multiple blocks on same page.
+    $block_id = $form['id']['#default_value'];
+    $this->configuration['block_id'] = $block_id;
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    $settings = [];
+    $settings = $items = [];
     foreach ($this->configuration['locations'] as $id => $location) {
-      $settings[$id] = $location;
-      $settings[$id]['imgpath'] = base_path() . 'libraries/jclocksgmt/';
-      $settings[$id]['offset'] = worldtime_get_timezone_offset($location['timezone']);
+      $block_id = 'block-' . $this->configuration['block_id'];
+      $widget_id = $block_id . '-wtc-widget-' . $id;
+      $settings[$block_id][$widget_id] = $location;
+      $settings[$block_id][$widget_id]['imgpath'] = base_path() . 'libraries/jclocksgmt/';
+      $settings[$block_id][$widget_id]['offset'] = worldtime_get_timezone_offset($location['timezone']);
+      $items[$widget_id] = [];
     }
 
     return [
       '#theme' => 'wtcwidget',
-      '#items' => array_keys($settings),
+      '#items' => $items,
       '#attached' => [
         'library' => 'worldtime/worldtime',
         'drupalSettings' => [
