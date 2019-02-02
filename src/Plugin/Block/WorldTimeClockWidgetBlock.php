@@ -21,11 +21,29 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    */
   public function blockForm($form, FormStateInterface $form_state) {
     $form = parent::blockForm($form, $form_state);
+    if (!worldtime_library_installed()) {
+      $this->messenger()->addMessage($this->t('The jClocksGMT library needs to be <a href="@url">downloaded</a> and extracted into the /libraries/jclocksgmt folder in your Drupal installation directory.', ['@url' => 'https://github.com/mcmastermind/jClocksGMT/archive/master.zip']), 'error');
+      return $form;
+    }
 
     $config = $this->getConfiguration();
     if (!$form_state->get('locations')) {
       $locations = isset($config['locations']) ? count($config['locations']) - 1 : 0;
       $form_state->set('locations', $locations);
+    }
+
+    $skins = [];
+    foreach (range(1, 5) as $id) {
+      $label = $this->t('Skin @id', ['@id' => $id]);
+      $image_variables = [
+        '#theme' => 'image',
+        '#uri' => base_path() . 'libraries/jclocksgmt/images/jcgmt-' . $id . '-clock_face.png',
+        '#alt' => $label,
+        '#title' => $label,
+        '#width' => 100,
+        '#height' => 100,
+      ];
+      $skins[$id] = \Drupal::service('renderer')->render($image_variables);
     }
 
     $form['locations'] = [
@@ -35,6 +53,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         'id' => 'locations-container',
       ],
     ];
+
     $locations = $form_state->get('locations');
     for ($i = 0; $i <= $locations; $i++) {
       $title = '';
@@ -84,12 +103,11 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#type' => 'radios',
         '#title' => $this->t('Clock Skin'),
         '#default_value' => $skin,
-        '#options' => [
-          1 => $this->t('Skin 1'),
-          2 => $this->t('Skin 2'),
-          3 => $this->t('Skin 3'),
-          4 => $this->t('Skin 4'),
-          5 => $this->t('Skin 5'),
+        '#options' => $skins,
+        '#attributes' => [
+          'class' => [
+            'container-inline',
+          ],
         ],
       ];
 

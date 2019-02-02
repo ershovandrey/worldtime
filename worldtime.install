@@ -13,8 +13,7 @@ function worldtime_requirements($phase) {
     return array();
   }
 
-  $library = \Drupal::service('library.discovery')->getLibraryByName('worldtime', 'jclocksgmt');
-  $library_exists = file_exists(DRUPAL_ROOT . '/' . $library['js'][0]['data']);
+  $library_exists = worldtime_library_installed();
 
   return [
     'worldtime_library_downloaded' => [

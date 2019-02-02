@@ -56,3 +56,14 @@ function worldtime_get_timezone_offset($timezone) {
   $offset = $dtz->getOffset($dt);
   return $offset / 3600;
 }
+
+/**
+ * Checks if jClocksGMT library is installed.
+ *
+ * @return bool
+ *   TRUE if library is installed.
+ */
+function worldtime_library_installed() {
+  $library = \Drupal::service('library.discovery')->getLibraryByName('worldtime', 'jclocksgmt');
+  return file_exists(DRUPAL_ROOT . '/' . $library['js'][0]['data']);
+}
