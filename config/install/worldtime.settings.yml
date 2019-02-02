@@ -1,0 +1,10 @@
+defaults:
+  timeformat: 'HH:mm'
+  dateformat: 'DD.MM.YYYY'
+  skin: 1
+  title: ''
+  timezone: ''
+  dst: true
+  digital: true
+  date: false
+  analog: true

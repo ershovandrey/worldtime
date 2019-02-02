@@ -67,17 +67,19 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       ],
     ];
 
+    $settings = \Drupal::config('worldtime.settings');
+
     $locations = $form_state->get('locations');
     for ($i = 0; $i <= $locations; $i++) {
-      $title = '';
-      $timezone = '';
-      $dst = TRUE;
-      $digital = TRUE;
-      $timeformat = WORLDTIME_DEFAULT_TIMEFORMAT;
-      $date = FALSE;
-      $dateformat = WORLDTIME_DEFAULT_DATEFORMAT;
-      $analog = TRUE;
-      $skin = WORLDTIME_DEFAULT_SKIN;
+      $title = $settings->get('defaults.title');
+      $timezone = $settings->get('defaults.timezone');
+      $dst = $settings->get('defaults.dst');
+      $digital = $settings->get('defaults.digital');
+      $timeformat = $settings->get('defaults.timeformat');
+      $date = $settings->get('defaults.date');
+      $dateformat = $settings->get('defaults.dateformat');
+      $analog = $settings->get('defaults.analog');
+      $skin = $settings->get('defaults.skin');
 
       if (isset($config['locations']) && isset($config['locations'][$i])) {
         $title = $config['locations'][$i]['title'];
@@ -276,7 +278,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     }
 
     // Store block id separately as workaround for multiple blocks on same page.
-    $block_id = $form['id']['#default_value'];
+    $block_id = $form['id']['#value'];
     $this->configuration['block_id'] = $block_id;
   }
 
