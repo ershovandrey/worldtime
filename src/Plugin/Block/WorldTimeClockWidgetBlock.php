@@ -32,33 +32,6 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form_state->set('locations', $locations);
     }
 
-    $now = \Drupal::time()->getRequestTime();
-    $time_options = [
-      'HH:mm' => \Drupal::service('date.formatter')->format($now, 'custom', 'H:i'),
-      'hh:mm A' => \Drupal::service('date.formatter')->format($now, 'custom', 'h:i A'),
-    ];
-
-    $date_options = [
-      'DD.MM.YYYY' => \Drupal::service('date.formatter')->format($now, 'custom', 'd.m.Y'),
-      'MM.DD.YYYY' => \Drupal::service('date.formatter')->format($now, 'custom', 'm.d.Y'),
-      'YYYY-MM-DD' => \Drupal::service('date.formatter')->format($now, 'custom', 'Y-m-d'),
-      'YYYY/MM/DD' => \Drupal::service('date.formatter')->format($now, 'custom', 'Y/m/d'),
-    ];
-
-    $skins = [];
-    foreach (range(1, 5) as $id) {
-      $label = $this->t('Skin @id', ['@id' => $id]);
-      $image_variables = [
-        '#theme' => 'image',
-        '#uri' => base_path() . 'libraries/jclocksgmt/images/jcgmt-' . $id . '-clock_face.png',
-        '#alt' => $label,
-        '#title' => $label,
-        '#width' => 100,
-        '#height' => 100,
-      ];
-      $skins[$id] = \Drupal::service('renderer')->render($image_variables);
-    }
-
     $form['locations'] = [
       '#tree' => TRUE,
       '#type' => 'container',
@@ -68,30 +41,23 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     ];
 
     $settings = \Drupal::config('worldtime.settings');
-
+    $defaults = $settings->get('defaults');
     $locations = $form_state->get('locations');
-    for ($i = 0; $i <= $locations; $i++) {
-      $title = $settings->get('defaults.title');
-      $timezone = $settings->get('defaults.timezone');
-      $dst = $settings->get('defaults.dst');
-      $digital = $settings->get('defaults.digital');
-      $timeformat = $settings->get('defaults.timeformat');
-      $date = $settings->get('defaults.date');
-      $dateformat = $settings->get('defaults.dateformat');
-      $analog = $settings->get('defaults.analog');
-      $skin = $settings->get('defaults.skin');
 
-      if (isset($config['locations']) && isset($config['locations'][$i])) {
-        $title = $config['locations'][$i]['title'];
-        $timezone = $config['locations'][$i]['timezone'];
-        $dst = $config['locations'][$i]['dst'];
-        $digital = $config['locations'][$i]['digital'];
-        $timeformat = $config['locations'][$i]['timeformat'];
-        $date = $config['locations'][$i]['date'];
-        $dateformat = $config['locations'][$i]['dateformat'];
-        $analog = $config['locations'][$i]['analog'];
-        $skin = $config['locations'][$i]['skin'];
+    if (count($config['locations']) > ($locations + 1)) {
+      // Remove last location if it was deleted by user.
+      array_pop($this->configuration['locations']);
+      $config = $this->getConfiguration();
+    }
+
+    $time_options = $this->getTimeOptions();
+    $date_options = $this->getDateOptions();
+
+    for ($i = 0; $i <= $locations; $i++) {
+      if (!isset($config['locations'][$i])) {
+        $config['locations'][$i] = $defaults;
       }
+
       $form['locations'][$i] = [
         '#type' => 'fieldset',
         '#title' => $this->t('Location #@number', ['@number' => $i + 1]),
@@ -101,7 +67,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form['locations'][$i]['title'] = [
         '#type' => 'textfield',
         '#title' => $this->t('City or Location'),
-        '#default_value' => $title,
+        '#default_value' => $config['locations'][$i]['title'],
         '#size' => 19,
         '#maxlength' => 19,
         '#required' => TRUE,
@@ -110,7 +76,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form['locations'][$i]['timezone'] = [
         '#type' => 'select',
         '#title' => t('Time zone'),
-        '#default_value' => $timezone,
+        '#default_value' => $config['locations'][$i]['timezone'],
         '#options' => system_time_zones(TRUE, TRUE),
         '#required' => TRUE,
       ];
@@ -118,18 +84,18 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form['locations'][$i]['dst'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable automatic Daylight Savings Time (DST) conversion'),
-        '#default_value' => $dst,
+        '#default_value' => $config['locations'][$i]['dst'],
       ];
 
       $form['locations'][$i]['digital'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show Digital clock'),
-        '#default_value' => $digital,
+        '#default_value' => $config['locations'][$i]['digital'],
       ];
       $form['locations'][$i]['timeformat'] = [
         '#type' => 'select',
         '#title' => t('Time format'),
-        '#default_value' => $timeformat,
+        '#default_value' => $config['locations'][$i]['timeformat'],
         '#options' => $time_options,
         '#states' => [
           'visible' => [
@@ -143,12 +109,12 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form['locations'][$i]['date'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show current date'),
-        '#default_value' => $date,
+        '#default_value' => $config['locations'][$i]['date'],
       ];
       $form['locations'][$i]['dateformat'] = [
         '#type' => 'select',
         '#title' => t('Time format'),
-        '#default_value' => $dateformat,
+        '#default_value' => $config['locations'][$i]['dateformat'],
         '#options' => $date_options,
         '#states' => [
           'visible' => [
@@ -162,13 +128,13 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $form['locations'][$i]['analog'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Show Analog clock'),
-        '#default_value' => $analog,
+        '#default_value' => $config['locations'][$i]['analog'],
       ];
       $form['locations'][$i]['skin'] = [
         '#type' => 'radios',
         '#title' => $this->t('Clock Skin'),
-        '#default_value' => $skin,
-        '#options' => $skins,
+        '#default_value' => $config['locations'][$i]['skin'],
+        '#options' => $this->getSkins(),
         '#attributes' => [
           'class' => [
             'container-inline',
@@ -288,7 +254,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
   public function build() {
     $settings = $items = [];
     foreach ($this->configuration['locations'] as $id => $location) {
-      $block_id = 'block-' . $this->configuration['block_id'];
+      $block_id = 'block-' . str_replace('_', '-', $this->configuration['block_id']);
       $widget_id = $block_id . '-wtc-widget-' . $id;
       $settings[$block_id][$widget_id] = $location;
       $settings[$block_id][$widget_id]['imgpath'] = base_path() . 'libraries/jclocksgmt/';
@@ -306,6 +272,77 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         ],
       ],
     ];
+  }
+
+  /**
+   * Get list of time formats.
+   *
+   * @return array
+   *   List of time formats.
+   */
+  private function getTimeOptions() {
+    $formats = [
+      'HH:mm' => 'H:i',
+      'hh:mm A' => 'h:i A',
+    ];
+    return $this->convertDateTimeFormats($formats);
+  }
+
+  /**
+   * Get list of date formats.
+   *
+   * @return array
+   *   List of dates formats.
+   */
+  private function getDateOptions() {
+    $formats = [
+      'DD.MM.YYYY' => 'd.m.Y',
+      'MM.DD.YYYY' => 'm.d.Y',
+      'YYYY-MM-DD' => 'Y-m-d',
+      'YYYY/MM/DD' => 'Y/m/d',
+    ];
+    return $this->convertDateTimeFormats($formats);
+  }
+
+  /**
+   * Convert DateTime format.
+   *
+   * @param array $formats
+   *   List of input and output formats.
+   *
+   * @return array
+   *   List of formatted datetimes.
+   */
+  private function convertDateTimeFormats($formats) {
+    $return = [];
+    $now = \Drupal::time()->getRequestTime();
+    foreach ($formats as $input => $output) {
+      $return[$input] = \Drupal::service('date.formatter')->format($now, 'custom', $output);
+    }
+    return $return;
+  }
+
+  /**
+   * Get list of skins.
+   *
+   * @return array
+   *   List of skins.
+   */
+  private function getSkins() {
+    $skins = [];
+    foreach (range(1, 5) as $id) {
+      $label = $this->t('Skin @id', ['@id' => $id]);
+      $image_variables = [
+        '#theme' => 'image',
+        '#uri' => base_path() . 'libraries/jclocksgmt/images/jcgmt-' . $id . '-clock_face.png',
+        '#alt' => $label,
+        '#title' => $label,
+        '#width' => 100,
+        '#height' => 100,
+      ];
+      $skins[$id] = \Drupal::service('renderer')->render($image_variables);
+    }
+    return $skins;
   }
 
 }
