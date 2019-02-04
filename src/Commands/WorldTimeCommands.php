@@ -23,8 +23,9 @@ class WorldTimeCommands extends DrushCommands {
   /**
    * Download and install the jClocksGMT plugin for World Time Clock Widget.
    *
-   * @param $path
-   *   Optional. A path where to install the jClocksGMT plugin. If omitted Drush will use the default location.
+   * @param string $path
+   *   Optional. A path where to install the jClocksGMT plugin.
+   *   If omitted Drush will use the default location.
    *
    * @command worldtime:plugin
    * @aliases worldtimeplugin,wtcwplugin,worldtime-plugin
@@ -32,15 +33,16 @@ class WorldTimeCommands extends DrushCommands {
   public function download($path = '') {
     $fs = new Filesystem();
 
-    if(empty($path)) {
+    if (empty($path)) {
       $path = drush_get_context('DRUSH_DRUPAL_ROOT') . '/libraries/jclocksgmt';
     }
 
-    // Create path if it doesn't exist
-    // Exit with a message otherwise
+    // Create path if it doesn't exist.
+    // Exit with a message otherwise.
     if (!$fs->exists($path)) {
       $fs->mkdir($path);
-    } else {
+    }
+    else {
       $this->logger()->notice(dt('jClocksGMT is already present at @path. No download required.', ['@path' => $path]));
       return;
     }

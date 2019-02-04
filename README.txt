@@ -22,11 +22,10 @@ INSTALLATION
 
 Drush:
 ------
-A Drush command is provides for easy installation of the jClocksGMT plugin itself.
+A Drush command is provides for easy installation of the jClocksGMT plugin.
 
 % drush worldtime-plugin
 
 The command will download the plugin and unpack it in "libraries/".
 It is possible to add another path as an option to the command, but not
 recommended unless you know what you are doing.
-

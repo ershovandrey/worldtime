@@ -16,7 +16,7 @@ use Drupal\Core\Template\Attribute;
  *   An associative array containing:
  *   - items: array of Widgets.
  */
-function template_preprocess_wtcwidget(&$variables) {
+function template_preprocess_wtcwidget(array &$variables) {
   foreach ($variables['items'] as $index => &$item) {
     $attributes = [
       'class' => ['wtc-widget'],

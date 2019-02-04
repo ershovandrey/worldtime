@@ -21,13 +21,18 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    */
   public function blockForm($form, FormStateInterface $form_state) {
     $form = parent::blockForm($form, $form_state);
+
+    // If jClocksGMT library is not installed - show the warning to the user.
     if (!worldtime_library_installed()) {
       $this->messenger()->addMessage($this->t('The jClocksGMT library needs to be <a href="@url">downloaded</a> and extracted into the /libraries/jclocksgmt folder in your Drupal installation directory.', ['@url' => 'https://github.com/mcmastermind/jClocksGMT/archive/master.zip']), 'error');
       return $form;
     }
 
     $config = $this->getConfiguration();
-    if (!$form_state->get('locations')) {
+
+    // Maintain the current number of added locations.
+    $locations = $form_state->get('locations');
+    if (!$locations) {
       $locations = isset($config['locations']) ? count($config['locations']) - 1 : 0;
       $form_state->set('locations', $locations);
     }
@@ -40,10 +45,6 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       ],
     ];
 
-    $settings = \Drupal::config('worldtime.settings');
-    $defaults = $settings->get('defaults');
-    $locations = $form_state->get('locations');
-
     if (count($config['locations']) > ($locations + 1)) {
       // Remove last location if it was deleted by user.
       array_pop($this->configuration['locations']);
@@ -52,9 +53,16 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
 
     $time_options = $this->getTimeOptions();
     $date_options = $this->getDateOptions();
+    $timezone_options = system_time_zones(TRUE, TRUE);
+    $skins = $this->getSkins();
+
+    // Get default settings for location.
+    $settings = \Drupal::config('worldtime.settings');
+    $defaults = $settings->get('defaults');
 
     for ($i = 0; $i <= $locations; $i++) {
       if (!isset($config['locations'][$i])) {
+        // If location is not exists yet - fill it with defaults.
         $config['locations'][$i] = $defaults;
       }
 
@@ -77,7 +85,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#type' => 'select',
         '#title' => t('Time zone'),
         '#default_value' => $config['locations'][$i]['timezone'],
-        '#options' => system_time_zones(TRUE, TRUE),
+        '#options' => $timezone_options,
         '#required' => TRUE,
       ];
 
@@ -134,7 +142,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#type' => 'radios',
         '#title' => $this->t('Clock Skin'),
         '#default_value' => $config['locations'][$i]['skin'],
-        '#options' => $this->getSkins(),
+        '#options' => $skins,
         '#attributes' => [
           'class' => [
             'container-inline',
@@ -168,6 +176,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       ],
     ];
     if ($locations > 0) {
+      // If there is more than 1 location - show the delete button.
       $form['locations']['actions']['remove_item'] = [
         '#type' => 'submit',
         '#value' => $this->t('Remove location #@number', ['@number' => $i]),
@@ -184,22 +193,18 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
   }
 
   /**
-   * AJAX callback handler.
+   * Callback for both ajax-enabled buttons.
    *
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *
-   * @return mixed
+   * Selects and returns the location form container with updated structure.
    */
   public function ajaxCallback(array &$form, FormStateInterface $form_state) {
     return $form['settings']['locations'];
   }
 
   /**
-   * AJAX submit handler for adding item.
+   * Submit handler for the "add-item" button.
    *
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * Increments the locations counter and causes a rebuild.
    */
   public function addItem(array &$form, FormStateInterface $form_state) {
     $form_state->set('locations', $form_state->get('locations') + 1);
@@ -207,10 +212,9 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
   }
 
   /**
-   * AJAX submit handler for removing item.
+   * Submit handler for the "remove-item" button.
    *
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * Decrements the locations counter and causes a form rebuild.
    */
   public function removeItem(array &$form, FormStateInterface $form_state) {
     if ($form_state->get('locations') > 0) {
@@ -227,6 +231,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     unset($values['locations']['actions']);
     foreach ($values['locations'] as $i => $location) {
       if (!$location['digital'] && !$location['analog']) {
+        // User must select either digital or analog clock or both.
         $form_state->setErrorByName('locations][' . $i . '][title', $this->t('You must select either digital or analog clock.'));
       }
     }
@@ -313,7 +318,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    * @return array
    *   List of formatted datetimes.
    */
-  private function convertDateTimeFormats($formats) {
+  private function convertDateTimeFormats(array $formats) {
     $return = [];
     $now = \Drupal::time()->getRequestTime();
     foreach ($formats as $input => $output) {

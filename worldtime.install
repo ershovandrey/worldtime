@@ -10,7 +10,7 @@
  */
 function worldtime_requirements($phase) {
   if ($phase != 'runtime') {
-    return array();
+    return [];
   }
 
   $library_exists = worldtime_library_installed();

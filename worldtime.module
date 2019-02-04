@@ -27,23 +27,25 @@ function worldtime_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_theme().
  */
 function worldtime_theme() {
-  return array(
-    'wtcwidget' => array(
-      'variables' => array(
+  return [
+    'wtcwidget' => [
+      'variables' => [
         'items' => NULL,
-      ),
+      ],
       'file' => 'worldtime.theme.inc',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Get timezone offset.
  *
  * @param string $timezone
+ *   Timezone identifier.
  *
  * @return int
  *   Timezone offset in hours.
+ *
  * @throws \Exception
  */
 function worldtime_get_timezone_offset($timezone) {
