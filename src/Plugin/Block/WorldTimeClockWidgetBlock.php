@@ -2,9 +2,15 @@
 
 namespace Drupal\worldtime\Plugin\Block;
 
+use Drupal\Component\Datetime\Time;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\RendererInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a 'WorldTimeClockWidgetBlock' block.
@@ -14,7 +20,87 @@ use Drupal\Core\Form\FormStateInterface;
  *  admin_label = @Translation("World Time Clock Widget block"),
  * )
  */
-class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterface {
+class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * Config Service.
+   *
+   * @var Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * Date Formatter Service.
+   *
+   * @var Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
+   * Renderer Service.
+   *
+   * @var Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Time component.
+   *
+   * @var Drupal\Component\Datetime\Time
+   */
+  protected $time;
+
+  /**
+   * {@inheritdoc}
+   *
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   Container object.
+   * @param array $configuration
+   *   Plugin configuration array.
+   * @param string $plugin_id
+   *   Plugin identifier.
+   * @param mixed $plugin_definition
+   *   Plugin definition object.
+   *
+   * @return static
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('config.factory'),
+      $container->get('date.formatter'),
+      $container->get('renderer'),
+      $container->get('datetime.time')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @param array $configuration
+   *   Configuration array.
+   * @param string $plugin_id
+   *   Plugin identifier.
+   * @param mixed $plugin_definition
+   *   Plugin definition object.
+   * @param Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Config factory service.
+   * @param Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
+   *   Date formatter service.
+   * @param Drupal\Core\Render\RendererInterface $renderer
+   *   Renderer service.
+   * @param Drupal\Component\Datetime\Time $time
+   *   Time component.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $configFactory, DateFormatterInterface $dateFormatter, RendererInterface $renderer, Time $time) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->configFactory = $configFactory;
+    $this->dateFormatter = $dateFormatter;
+    $this->renderer = $renderer;
+    $this->time = $time;
+  }
 
   /**
    * {@inheritdoc}
@@ -57,7 +143,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
     $skins = $this->getSkins();
 
     // Get default settings for location.
-    $settings = \Drupal::config('worldtime.settings');
+    $settings = $this->configFactory->get('worldtime.settings');
     $defaults = $settings->get('defaults');
 
     for ($i = 0; $i <= $locations; $i++) {
@@ -320,9 +406,9 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    */
   private function convertDateTimeFormats(array $formats) {
     $return = [];
-    $now = \Drupal::time()->getRequestTime();
+    $now = $this->time->getRequestTime();
     foreach ($formats as $input => $output) {
-      $return[$input] = \Drupal::service('date.formatter')->format($now, 'custom', $output);
+      $return[$input] = $this->dateFormatter->format($now, 'custom', $output);
     }
     return $return;
   }
@@ -345,7 +431,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
         '#width' => 100,
         '#height' => 100,
       ];
-      $skins[$id] = \Drupal::service('renderer')->render($image_variables);
+      $skins[$id] = $this->renderer->render($image_variables);
     }
     return $skins;
   }

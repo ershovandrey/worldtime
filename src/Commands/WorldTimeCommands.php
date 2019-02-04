@@ -2,6 +2,7 @@
 
 namespace Drupal\worldtime\Commands;
 
+use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Filesystem\Filesystem;
 use GuzzleHttp\Client;
@@ -19,6 +20,24 @@ use GuzzleHttp\Exception\RequestException;
  *   - http://cgit.drupalcode.org/devel/tree/drush.services.yml
  */
 class WorldTimeCommands extends DrushCommands {
+
+  /**
+   * Library Discovery service.
+   *
+   * @var Drupal\Core\Asset\LibraryDiscoveryInterface
+   */
+  protected $library;
+
+  /**
+   * {@inheritdoc}
+   *
+   * @param Drupal\Core\Asset\LibraryDiscoveryInterface $library
+   *   Library Discovery service.
+   */
+  public function __construct(LibraryDiscoveryInterface $library) {
+    parent::__construct();
+    $this->library = $library;
+  }
 
   /**
    * Download and install the jClocksGMT plugin for World Time Clock Widget.
@@ -48,7 +67,7 @@ class WorldTimeCommands extends DrushCommands {
     }
 
     // Load the worldtime defined library.
-    if ($library = \Drupal::service('library.discovery')->getLibraryByName('worldtime', 'jclocksgmt')) {
+    if ($library = $this->library->getLibraryByName('worldtime', 'jclocksgmt')) {
 
       // Download the file.
       $client = new Client();

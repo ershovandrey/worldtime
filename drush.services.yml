@@ -1,5 +1,6 @@
 services:
   worldtime.commands:
     class: \Drupal\worldtime\Commands\WorldTimeCommands
+    arguments: ['@library.discovery']
     tags:
       - { name: drush.command }
