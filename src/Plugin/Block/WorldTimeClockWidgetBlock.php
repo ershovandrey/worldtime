@@ -83,7 +83,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
 
       $form['locations'][$i]['timezone'] = [
         '#type' => 'select',
-        '#title' => t('Time zone'),
+        '#title' => $this->t('Time zone'),
         '#default_value' => $config['locations'][$i]['timezone'],
         '#options' => $timezone_options,
         '#required' => TRUE,
@@ -102,7 +102,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       ];
       $form['locations'][$i]['timeformat'] = [
         '#type' => 'select',
-        '#title' => t('Time format'),
+        '#title' => $this->t('Time format'),
         '#default_value' => $config['locations'][$i]['timeformat'],
         '#options' => $time_options,
         '#states' => [
@@ -121,7 +121,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       ];
       $form['locations'][$i]['dateformat'] = [
         '#type' => 'select',
-        '#title' => t('Time format'),
+        '#title' => $this->t('Time format'),
         '#default_value' => $config['locations'][$i]['dateformat'],
         '#options' => $date_options,
         '#states' => [
