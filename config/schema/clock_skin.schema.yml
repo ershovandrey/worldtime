@@ -1,0 +1,10 @@
+worldtime.clock_skin.*:
+  type: config_entity
+  label: 'Clock skin config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'

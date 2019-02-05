@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: '2'
+label: 'Skin 2'
+locked: true

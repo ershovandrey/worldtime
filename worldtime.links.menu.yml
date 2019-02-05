@@ -1,0 +1,9 @@
+
+# Clock skin menu items definition
+entity.clock_skin.collection:
+  title: 'Clock skins'
+  route_name: entity.clock_skin.collection
+  description: 'List Clock skins'
+  parent: system.admin_config_ui
+  weight: 99
+

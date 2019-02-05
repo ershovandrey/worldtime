@@ -1,0 +1,6 @@
+entity.clock_skin.add_form:
+  route_name: entity.clock_skin.add_form
+  title: 'Add Clock skin'
+  appears_on:
+    - entity.clock_skin.collection
+
