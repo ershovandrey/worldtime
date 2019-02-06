@@ -16,6 +16,7 @@ class ClockSkinListBuilder extends ConfigEntityListBuilder {
   public function buildHeader() {
     $header['label'] = $this->t('Clock skin');
     $header['id'] = $this->t('Machine name');
+    $header['skin'] = $this->t('Skin image');
     return $header + parent::buildHeader();
   }
 
@@ -25,6 +26,7 @@ class ClockSkinListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $entity->label();
     $row['id'] = $entity->id();
+    $row['skin'] = \Drupal::service('worldtime.skin_renderer')->renderSkin($entity);
     // You probably want a few more properties here...
     return $row + parent::buildRow($entity);
   }

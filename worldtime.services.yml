@@ -1,0 +1,4 @@
+services:
+  worldtime.skin_renderer:
+    class: Drupal\worldtime\SkinRendererService
+    arguments: ['@renderer']

@@ -10,7 +10,7 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Render\RendererInterface;
+use Drupal\worldtime\SkinRendererServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -79,7 +79,7 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
       $plugin_definition,
       $container->get('config.factory'),
       $container->get('date.formatter'),
-      $container->get('renderer'),
+      $container->get('worldtime.skin_renderer'),
       $container->get('datetime.time'),
       $container->get('entity_type.manager')
     );
@@ -98,14 +98,14 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    *   Config factory service.
    * @param Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
    *   Date formatter service.
-   * @param Drupal\Core\Render\RendererInterface $renderer
+   * @param \Drupal\worldtime\SkinRendererServiceInterface $renderer
    *   Renderer service.
    * @param Drupal\Component\Datetime\Time $time
    *   Time component.
    * @param Drupal\Core\Entity\EntityTypeManagerInterface $manager
    *   EntityType Manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $configFactory, DateFormatterInterface $dateFormatter, RendererInterface $renderer, Time $time, EntityTypeManagerInterface $manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $configFactory, DateFormatterInterface $dateFormatter, SkinRendererServiceInterface $renderer, Time $time, EntityTypeManagerInterface $manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->configFactory = $configFactory;
     $this->dateFormatter = $dateFormatter;
@@ -429,25 +429,15 @@ class WorldTimeClockWidgetBlock extends BlockBase implements BlockPluginInterfac
    * Get list of skins.
    *
    * @return array
-   *   List of skins.
+   *   List of rendered skins.
    */
   private function getSkins() {
     $return = [];
     $skins = $this->entityManager->getStorage('clock_skin')->loadByProperties(['status' => TRUE]);
     foreach ($skins as $skin) {
-      $id = $skin->getId();
-      $uri = base_path() . 'libraries/jclocksgmt/images/jcgmt-' . $id . '-clock_face.png';
-      if (file_exists(DRUPAL_ROOT . $uri)) {
-        $label = $skin->getLabel();
-        $image_variables = [
-          '#theme' => 'image',
-          '#uri' => $uri,
-          '#alt' => $label,
-          '#title' => $label,
-          '#width' => 100,
-          '#height' => 100,
-        ];
-        $return[$id] = $this->renderer->render($image_variables);
+      $rendered = $this->renderer->renderSkin($skin);
+      if ($rendered) {
+        $return[$skin->getId()] = $rendered;
       }
     }
     return $return;
